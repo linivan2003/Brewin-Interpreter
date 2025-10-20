@@ -15,8 +15,8 @@ class Interpreter(InterpreterBase):
         #print("Number of statements:", len(main_func_node.dict['statements']))
         self.run_func(main_func_node) #iterates through nodes and interprets the statements one after another
 
-    def run_func(self, func_node):    #iterate through the nodes and run the statements
-	    for statement_node in func_node.dict['statements']:
+    def run_func(self, main_func_node):    #iterate through the nodes and run the statements
+	    for statement_node in main_func_node.dict['statements']:
 		    self.run_statement(statement_node)
 
     def run_statement(self, statement_node):  #check which type of statement and run the statement
@@ -36,7 +36,7 @@ class Interpreter(InterpreterBase):
         #print("var name is", var_name)
         # Check if variable is already declared
         if var_name in self.variable_name_to_value:
-            self.error(ErrorType.NAME_ERROR, f"Variable {var_name} already declared")
+            self.error(ErrorType.NAME_ERROR, "Variable already declared")
         self.variable_name_to_value[var_name] = None
 
     def do_assignment(self,statement_node):  #assign variable
@@ -58,24 +58,24 @@ class Interpreter(InterpreterBase):
             left_val = self.do_expression(expression_node.dict['op1'])
             right_val = self.do_expression(expression_node.dict['op2'])
             if isinstance(left_val,int) == False:
-                self.error(ErrorType.TYPE_ERROR, f"Left operand must be integer")
+                self.error(ErrorType.TYPE_ERROR, "Left operand must be integer")
             if isinstance(right_val,int) == False:
-                self.error(ErrorType.TYPE_ERROR, f"Right operand must be integer")
+                self.error(ErrorType.TYPE_ERROR, "Right operand must be integer")
             return left_val + right_val
         elif expression_node.elem_type == "-": #subtraction
             left_val = self.do_expression(expression_node.dict['op1'])
             right_val = self.do_expression(expression_node.dict['op2'])
             if isinstance(left_val,int) == False:
-                self.error(ErrorType.TYPE_ERROR, f"Left operand must be integer")
+                self.error(ErrorType.TYPE_ERROR, "Left operand must be integer")
             if isinstance(right_val,int)== False:
-                self.error(ErrorType.TYPE_ERROR, f"Right operand must be integer")
+                self.error(ErrorType.TYPE_ERROR, "Right operand must be integer")
             return left_val - right_val
         elif expression_node.elem_type == "qname": #qualified name variable expression
             var_name = expression_node.dict['name']
             if var_name not in self.variable_name_to_value:
-                self.error(ErrorType.NAME_ERROR, f"Variable {var_name} not defined")
+                self.error(ErrorType.NAME_ERROR, "Variable {var_name} not defined")
             if self.variable_name_to_value[var_name] is None:
-                self.error(ErrorType.NAME_ERROR, f"Variable {var_name} not assigned")
+                self.error(ErrorType.NAME_ERROR, "Variable {var_name} not assigned")
             return self.variable_name_to_value[var_name]
         elif expression_node.elem_type == "fcall": #fcall to inputi
             func_name = expression_node.dict['name']
@@ -93,7 +93,7 @@ class Interpreter(InterpreterBase):
                 user_input = self.get_input()
                 return int(user_input)
             else:
-                self.error(ErrorType.NAME_ERROR, f"Unknown function: {func_name}")
+                self.error(ErrorType.NAME_ERROR, "Unknown function")
     def do_func_call(self,statement_node):
         func_name = statement_node.dict['name']
         args = statement_node.dict['args']
@@ -116,7 +116,7 @@ class Interpreter(InterpreterBase):
                 user_input = self.get_input()
                 integer_value = int(user_input) #technically dont need to store if called as a statement but for syntax iits okay
         else:
-            self.error(ErrorType.NAME_ERROR, "Unknown function:")
+            self.error(ErrorType.NAME_ERROR, "Unknown function")
 
 
     
