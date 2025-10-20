@@ -1,6 +1,5 @@
 from brewparse import parse_program
 from intbase import InterpreterBase, ErrorType
-import matplotlib.pyplot as plt
 
 class Interpreter(InterpreterBase):
     def __init__(self, console_output=True, inp=None, trace_output=False):
@@ -9,7 +8,11 @@ class Interpreter(InterpreterBase):
     def run(self, program):
         ast = parse_program(program) 
         self.variable_name_to_value = {} # dict to hold variables
+        if ast.dict.get('functions') == None or len(ast.dict['functions']) == 0: #check for no main function
+            self.error(ErrorType.NAME_ERROR, "No main() function was found")
         main_func_node = ast.dict['functions'][0]  #locate the node that holds details about the main() function
+        if main_func_node.dict['name'] != 'main':
+            self.error(ErrorType.NAME_ERROR, "No main() function was found")
         #print("Found main function!")
         #print("Function name:", main_func_node.dict['name'])
         #print("Number of statements:", len(main_func_node.dict['statements']))
@@ -42,6 +45,8 @@ class Interpreter(InterpreterBase):
     def do_assignment(self,statement_node):  #assign variable
         var_name = statement_node.dict['var']
         expression_node = statement_node.dict['expression']
+        if var_name not in self.variable_name_to_value:
+            self.error(ErrorType.NAME_ERROR, "Variable has not been defined")
         #print("assigning to variable:", var_name)
         #print("expression to evaluate:", expression_node.elem_type)
         result = self.do_expression(expression_node)      #use helper to evaluate expression node
@@ -73,9 +78,9 @@ class Interpreter(InterpreterBase):
         elif expression_node.elem_type == "qname": #qualified name variable expression
             var_name = expression_node.dict['name']
             if var_name not in self.variable_name_to_value:
-                self.error(ErrorType.NAME_ERROR, "Variable {var_name} not defined")
+                self.error(ErrorType.NAME_ERROR, "Variable not defined")
             if self.variable_name_to_value[var_name] is None:
-                self.error(ErrorType.NAME_ERROR, "Variable {var_name} not assigned")
+                self.error(ErrorType.NAME_ERROR, "Variable not assigned")
             return self.variable_name_to_value[var_name]
         elif expression_node.elem_type == "fcall": #fcall to inputi
             func_name = expression_node.dict['name']
